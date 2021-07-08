@@ -1,0 +1,49 @@
+version: "3"
+services:
+  service_zlmedia:
+    container_name: container_zlmedia
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+    environment:
+      TZ: Asia/Shanghai
+    restart: always
+
+  service_redis:
+    image: redis:5.0.3-alpine
+    container_name: container_redis
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./data/redis/:/data/
+      - ./log/redis/:/var/log/redis/
+    command: redis-server /usr/local/etc/redis/redis.conf
+    expose: 
+      - 6379
+    # ports:
+    #   - 6379:6379
+    restart: always
+   # networks:
+    #  - appnet
+
+  service_wvp:
+    container_name: container_wvp
+    build:
+      context: .
+      dockerfile: Dockerfile.java
+    environment:
+      TZ: Asia/Shanghai
+      # spring.datasource.host: service_mysql
+      # spring.redis.host: service_redis
+    ports:
+      - 8080:8080
+    depends_on:
+      - service_redis
+      - service_zlmedia
+    # links:
+    #   - service_redis
+    #   - service_zlmedia
+    restart: always
+    #networks:
+     # - appnet
