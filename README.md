@@ -46,6 +46,20 @@ MySQL 容器首次启动会自动执行 `docker/初始化-mysql-2.7.4.sql` 完�
 - ❌ 移除 Redis 5.0.3 → 升级为官方 compose 方案（Redis + MySQL 8 + nginx）
 - ⚠️ 旧库数据不兼容，升级前请自行迁移设备配置
 
+
+## 实测记录（2026-10-15，Docker 29 / Compose 2.40，Ubuntu 24.04）
+
+本方案已实际部署验证：5 个容器全部健康，ZLM↔WVP hook 互通，并用模拟 GB28181 设备完成
+`REGISTER → 401 挑战 → Digest 认证 → 200 OK → 设备上线` 全流程，WVP API 可查询到在线设备。
+
+注意事项：
+
+- **默认密码**：初始账号 `admin`，初始密码为 `admin`（API 需传 `md5(admin)=21232f297a57a5a743894a0e4a801fc3`）。
+  ⚠️ v2.7.4 默认密码用户除改密/登出外**所有接口返回 403**，登录 Web 后请立即改密码（≥10位，含大小写/数字/特殊符号）。
+- **国内服务器**：Docker Hub 直连大概率超时，可配置 `/etc/docker/daemon.json`：
+  `{"registry-mirrors": ["https://docker.1ms.run", "https://docker.m.daocloud.io", "https://hub.rat.dev"]}`
+- 未注册推流会被 WVP 的 `on_publish` hook 拒绝（401），这是预期安全行为；仅 GB28181 设备或在 WVP 注册的拉流代理可出流。
+
 ## 变更记录
 
 - 2021-10 初版
