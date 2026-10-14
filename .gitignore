@@ -1,0 +1,3 @@
+docker/volumes/
+docker/logs/
+.DS_Store
